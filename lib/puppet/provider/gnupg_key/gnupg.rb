@@ -17,10 +17,18 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
   commands :gpg => 'gpg'
   commands :awk => 'awk'
 
+  def gpgenv(resource)
+    if resource[:gnupg_home]
+      { 'GNUPGHOME' => resource[:gnupg_home] }
+    else
+      {}
+    end
+  end
+
   def remove_key
     begin
       fingerprint_command = "gpg --fingerprint --with-colons #{resource[:key_id]} | awk -F: '$1 == \"fpr\" {print $10;}'"
-      fingerprint = Puppet::Util::Execution.execute(fingerprint_command, :uid => user_id)
+      fingerprint = Puppet::Util::Execution.execute(fingerprint_command, :uid => user_id, :custom_environment => gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
       raise Puppet::Error, "Could not determine fingerprint for  #{resource[:key_id]} for user #{resource[:user]}: #{fingerprint}"
     end
@@ -34,7 +42,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     end
 
     begin
-      output = Puppet::Util::Execution.execute(command,  :uid => user_id)
+      output = Puppet::Util::Execution.execute(command,  :uid => user_id, :custom_environment => gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
       raise Puppet::Error, "Could not remove #{resource[:key_id]} for user #{resource[:user]}: #{output}"
     end
@@ -59,7 +67,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
       command = "gpg --keyserver #{resource[:key_server]} --keyserver-options http-proxy=#{resource[:proxy]} --recv-keys #{resource[:key_id]}"
     end
     begin
-      output = Puppet::Util::Execution.execute(command,  :uid => user_id, :failonfail => true)
+      output = Puppet::Util::Execution.execute(command,  :uid => user_id, :failonfail => true, :custom_environment => gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
       raise Puppet::Error, "Key #{resource[:key_id]} does not exist on #{resource[:key_server]}"
     end
@@ -77,7 +85,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     path = create_temporary_file(user_id, resource[:key_content])
     command = "gpg --batch --import #{path}"
     begin
-      output = Puppet::Util::Execution.execute(command, :uid => user_id, :failonfail => true)
+      output = Puppet::Util::Execution.execute(command, :uid => user_id, :failonfail => true, :custom_environment => gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
       raise Puppet::Error, "Error while importing key #{resource[:key_id]} using key content:\n#{output}}"
     end
@@ -87,7 +95,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     if File.file?(resource[:key_source])
       command = "gpg --batch --import #{resource[:key_source]}"
       begin
-        output = Puppet::Util::Execution.execute(command, :uid => user_id, :failonfail => true)
+        output = Puppet::Util::Execution.execute(command, :uid => user_id, :failonfail => true, :custom_environment => gpgenv(resource))
       rescue Puppet::ExecutionFailure => e
         raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}"
       end
@@ -112,7 +120,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
       command = "gpg --batch --import #{path}"
     end
     begin
-      output = Puppet::Util::Execution.execute(command, :uid => user_id, :failonfail => true)
+      output = Puppet::Util::Execution.execute(command, :uid => user_id, :failonfail => true, :custom_environment => gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
       raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}:\n#{e}"
     end
@@ -154,7 +162,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
       command = "gpg --list-secret-keys --with-colons #{resource[:key_id]}"
     end
 
-    output = Puppet::Util::Execution.execute(command, :uid => user_id)
+    output = Puppet::Util::Execution.execute(command, :uid => user_id, :custom_environment => gpgenv(resource))
     if output.exitstatus == 0
       return true
     elsif output.exitstatus == 2

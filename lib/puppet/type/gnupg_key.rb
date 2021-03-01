@@ -181,5 +181,19 @@ Puppet::Type.newtype(:gnupg_key) do
       end
     end
   end
-    
+
+  newparam(:gnupg_home) do
+    desc "The gnupg home directory. Overrides the default user's homedir."
+    defaultto false
+
+    validate do |value|
+      unless Puppet::Util.absolute_path?(value)
+        fail Puppet::Error, _("File paths must be fully qualified, not '%{path}'") % { path: value }
+      end
+    end
+
+    munge do |value|
+      ::File.join(::File.split(::File.expand_path(value)))
+    end
+  end
 end
