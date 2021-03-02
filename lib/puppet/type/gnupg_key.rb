@@ -1,23 +1,23 @@
 require 'uri'
 Puppet::Type.newtype(:gnupg_key) do
-  @doc = "Manage PGP public keys with GnuPG"
+  @doc = 'Manage PGP public keys with GnuPG'
 
   ensurable
 
   autorequire(:package) do
-    ["gnupg", "gnupg2"]
+    ['gnupg', 'gnupg2']
   end
 
   autorequire(:user) do
     self[:user]
   end
 
-  KEY_SOURCES = [:key_source, :key_server, :key_content]
+  KEY_SOURCES = [:key_source, :key_server, :key_content].freeze
 
   KEY_CONTENT_REGEXES = {
-    :public => ["-----BEGIN PGP PUBLIC KEY BLOCK-----", "-----END PGP PUBLIC KEY BLOCK-----"],
-    :private => ["-----BEGIN PGP PRIVATE KEY BLOCK-----", "-----END PGP PRIVATE KEY BLOCK-----"]
-  }
+    public: ['-----BEGIN PGP PUBLIC KEY BLOCK-----', '-----END PGP PUBLIC KEY BLOCK-----'],
+    private: ['-----BEGIN PGP PRIVATE KEY BLOCK-----', '-----END PGP PRIVATE KEY BLOCK-----'],
+  }.freeze
 
   validate do
     creator_count = 0
@@ -26,13 +26,13 @@ Puppet::Type.newtype(:gnupg_key) do
     end
 
     if creator_count > 1
-      raise ArgumentError, "You cannot specify more than one of #{KEY_SOURCES.collect { |p| p.to_s}.join(", ")}, " +
-        "much to learn, you still have."
+      raise ArgumentError, "You cannot specify more than one of #{KEY_SOURCES.map { |p| p.to_s }.join(', ')}, " \
+                           'much to learn, you still have.'
     end
 
     if creator_count == 0 && self[:ensure] == :present
-      raise ArgumentError, "You need to specify at least one of #{KEY_SOURCES.collect { |p| p.to_s}.join(", ")}, " +
-        "much to learn, you still have."
+      raise ArgumentError, "You need to specify at least one of #{KEY_SOURCES.map { |p| p.to_s }.join(', ')}, " \
+                           'much to learn, you still have.'
     end
 
     if self[:ensure] == :present && self[:key_type] == :both
@@ -40,20 +40,19 @@ Puppet::Type.newtype(:gnupg_key) do
     end
 
     [:public, :private].each do |type|
-      if self[:key_content] && self[:key_type] == type
-        key_lines = self[:key_content].strip.lines.to_a
+      next unless self[:key_content] && self[:key_type] == type
+      key_lines = self[:key_content].strip.lines.to_a
 
-        first_line = key_lines.first.strip
-        last_line = key_lines.last.strip
+      first_line = key_lines.first.strip
+      last_line = key_lines.last.strip
 
-        unless first_line == KEY_CONTENT_REGEXES[type][0] && last_line == KEY_CONTENT_REGEXES[type][1]
-          raise ArgumentError, "Provided key content does not look like a #{type} key."
-        end
+      unless first_line == KEY_CONTENT_REGEXES[type][0] && last_line == KEY_CONTENT_REGEXES[type][1]
+        raise ArgumentError, "Provided key content does not look like a #{type} key."
       end
     end
   end
 
-  newparam(:name, :namevar => true) do
+  newparam(:name, namevar: true) do
     desc "This attribute is currently used as a
       system-wide primary key - namevar and therefore has to be unique."
   end
@@ -64,7 +63,7 @@ Puppet::Type.newtype(:gnupg_key) do
 
     validate do |value|
       # freebsd/linux username limitation
-      unless value =~ /^[a-z_][a-z0-9_-]*[$]?/
+      unless value =~ %r{^[a-z_][a-z0-9_-]*[$]?}
         raise ArgumentError, "Invalid username format for #{value}"
       end
     end
@@ -83,8 +82,7 @@ Puppet::Type.newtype(:gnupg_key) do
     EOT
 
     validate do |source|
-
-      raise ArgumentError, "Arrays not accepted as an source parameter" if source.is_a?(Array)
+      raise ArgumentError, 'Arrays not accepted as an source parameter' if source.is_a?(Array)
       break if Puppet::Util.absolute_path?(source)
 
       begin
@@ -99,7 +97,7 @@ Puppet::Type.newtype(:gnupg_key) do
 
       raise ArgumentError, "Cannot use relative URLs '#{source}'" unless uri.absolute?
       raise ArgumentError, "Cannot use opaque URLs '#{source}'" unless uri.hierarchical?
-      raise ArgumentError, "Cannot use URLs of type '#{uri.scheme}' as source for fileserving" unless %w{file puppet https http}.include?(uri.scheme)
+      raise ArgumentError, "Cannot use URLs of type '#{uri.scheme}' as source for fileserving" unless ['file', 'puppet', 'https', 'http'].include?(uri.scheme)
     end
 
     munge do |source|
@@ -115,11 +113,10 @@ Puppet::Type.newtype(:gnupg_key) do
         source
       end
     end
-
   end
 
   newparam(:key_server) do
-    desc "PGP key server from where to retrieve the public key"
+    desc 'PGP key server from where to retrieve the public key'
 
     validate do |server|
       if server
@@ -129,12 +126,11 @@ Puppet::Type.newtype(:gnupg_key) do
           uri = URI.parse(URI.escape(server))
         end
         unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS) ||
-            uri.is_a?(URI::LDAP) || %w{hkp}.include?(uri.scheme)
+               uri.is_a?(URI::LDAP) || ['hkp'].include?(uri.scheme)
           raise ArgumentError, "Invalid keyserver value #{server}"
         end
       end
     end
-
   end
 
   newparam(:key_content) do
@@ -153,12 +149,12 @@ Puppet::Type.newtype(:gnupg_key) do
     end
 
     munge do |value|
-      value.upcase.intern
+      value.upcase.to_sym
     end
   end
 
   newparam(:key_type) do
-    desc "The type of the key(s) being managed."
+    desc 'The type of the key(s) being managed.'
 
     newvalues(:public, :private, :both)
 
@@ -166,8 +162,8 @@ Puppet::Type.newtype(:gnupg_key) do
   end
 
   newparam(:proxy) do
-    desc "Set the proxy to use for HTTP and HKP keyservers."
-    
+    desc 'Set the proxy to use for HTTP and HKP keyservers.'
+
     validate do |value|
       if value
         if URI.const_defined? 'DEFAULT_PARSER'
@@ -188,7 +184,7 @@ Puppet::Type.newtype(:gnupg_key) do
 
     validate do |value|
       unless Puppet::Util.absolute_path?(value)
-        fail Puppet::Error, _("File paths must be fully qualified, not '%{path}'") % { path: value }
+        raise Puppet::Error, _("File paths must be fully qualified, not '%{path}'") % { path: value }
       end
     end
 

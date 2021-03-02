@@ -1,7 +1,6 @@
 require 'spec_helper_system'
 
 describe 'install gnupg:' do
-
   it 'test loading class with no arguments' do
     pp = <<-EOS.unindent
       class {'gnupg':}

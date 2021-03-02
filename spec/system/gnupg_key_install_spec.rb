@@ -1,14 +1,13 @@
 require 'spec_helper_system'
 
 describe 'gnupg_key install' do
-
   before :all do
     puppet_apply("class {'gnupg': } ") do |r|
       r.exit_code.should == 0
     end
   end
 
-  it 'should install a public key from a HTTP URL address' do
+  it 'installs a public key from a HTTP URL address' do
     pp = <<-EOS.unindent
       gnupg_key { 'jenkins_key':
         ensure     => present,
@@ -25,14 +24,14 @@ describe 'gnupg_key install' do
     end
 
     # check that gnupg installed the key
-    gpg("--list-keys D50582E6") do |r|
-      r.stdout.should =~ /D50582E6/
+    gpg('--list-keys D50582E6') do |r|
+      r.stdout.should =~ %r{D50582E6}
       r.stderr.should == ''
       r.exit_code == 0
     end
   end
 
-  it 'should install a public key from a HTTPS URL address' do
+  it 'installs a public key from a HTTPS URL address' do
     pp = <<-EOS.unindent
       gnupg_key { 'newrelic_key':
         ensure     => present,
@@ -49,14 +48,14 @@ describe 'gnupg_key install' do
     end
 
     # check that gnupg installed the key
-    gpg("--list-keys 548C16BF") do |r|
-      r.stdout.should =~ /548C16BF/
+    gpg('--list-keys 548C16BF') do |r|
+      r.stdout.should =~ %r{548C16BF}
       r.stderr.should == ''
       r.exit_code == 0
     end
   end
 
-  it 'should install a public key from a key server' do
+  it 'installs a public key from a key server' do
     pp = <<-EOS.unindent
       gnupg_key { 'root_key_foo':
         ensure    => present,
@@ -73,14 +72,14 @@ describe 'gnupg_key install' do
     end
 
     # check that gnupg installed the key
-    gpg("--list-keys 20BC0A86") do |r|
-      r.stdout.should =~ /20BC0A86/
+    gpg('--list-keys 20BC0A86') do |r|
+      r.stdout.should =~ %r{20BC0A86}
       r.stderr.should == ''
       r.exit_code == 0
     end
   end
 
-  it 'should remove public key 20BC0A86' do
+  it 'removes public key 20BC0A86' do
     pp = <<-EOS.unindent
       gnupg_key { 'bye_bye_key':
         ensure => absent,
@@ -96,7 +95,7 @@ describe 'gnupg_key install' do
     end
   end
 
-  it 'should install public key from the puppet fileserver/module repository' do
+  it 'installs public key from the puppet fileserver/module repository' do
     pp = <<-EOS.unindent
       gnupg_key {'add_key_by_remote_source':
         ensure     => present,
@@ -113,14 +112,14 @@ describe 'gnupg_key install' do
     end
 
     # check that gnupg installed the key
-    gpg("--list-keys 20BC0A86") do |r|
-      r.stdout.should =~ /20BC0A86/
+    gpg('--list-keys 20BC0A86') do |r|
+      r.stdout.should =~ %r{20BC0A86}
       r.stderr.should == ''
       r.exit_code == 0
     end
   end
 
-  it 'should not install a public key, because local resource does not exists' do
+  it 'does not install a public key, because local resource does not exists' do
     pp = <<-EOS.unindent
       gnupg_key { 'jenkins_key':
         ensure     => present,
@@ -135,7 +134,7 @@ describe 'gnupg_key install' do
     end
   end
 
-  it 'should fail to install a public key, because there is no content at the supplied URL address' do
+  it 'fails to install a public key, because there is no content at the supplied URL address' do
     pp = <<-EOS.unindent
       gnupg_key { 'jenkins_key':
         ensure     => present,

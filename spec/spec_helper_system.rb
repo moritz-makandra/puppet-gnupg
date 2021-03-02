@@ -11,7 +11,7 @@ class String
   # Provide ability to remove indentation from strings, for the purpose of
   # left justifying heredoc blocks.
   def unindent
-    gsub(/^#{scan(/^\s*/).min_by{|l|l.length}}/, "")
+    gsub(%r{^#{scan(%r{^\s*}).min_by { |l| l.length }}}, '')
   end
 end
 
@@ -45,7 +45,7 @@ RSpec.configure do |c|
     puppet_install
 
     # Install my module from the current working copy
-    puppet_module_install(:source => proj_root, :module_name => 'gnupg')
+    puppet_module_install(source: proj_root, module_name: 'gnupg')
     shell 'whoami'
     shell 'puppet module list'
 
@@ -57,10 +57,9 @@ RSpec.configure do |c|
 :logger: noop
       EOS
       file.close
-      rcp(:sp => file.path, :dp => '/etc/puppet/hiera.yaml')
+      rcp(sp: file.path, dp: '/etc/puppet/hiera.yaml')
     ensure
       file.unlink
     end
   end
 end
-
