@@ -69,7 +69,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     begin
       output = Puppet::Util::Execution.execute(command,  :uid => user_id, :failonfail => true, :custom_environment => gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
-      raise Puppet::Error, "Key #{resource[:key_id]} does not exist on #{resource[:key_server]}"
+      raise Puppet::Error, "Key #{resource[:key_id]} does not exist on #{resource[:key_server]}\n#{e}"
     end
   end
 
