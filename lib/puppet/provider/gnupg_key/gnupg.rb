@@ -113,8 +113,6 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     case uri.scheme
     when /https/
       command = "wget -O- #{resource[:key_source]} | gpg --batch --import"
-    when /http/
-      command = "gpg --fetch-keys #{resource[:key_source]} 2>&1"
     when 'puppet'
       path = create_temporary_file user_id, puppet_content
       command = "gpg --batch --import #{path}"
