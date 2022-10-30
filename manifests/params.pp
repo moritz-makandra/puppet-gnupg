@@ -1,7 +1,6 @@
 # @summary Set module defaults
 # @api private
 class gnupg::params {
-
   $package_ensure = 'present'
 
   case $facts['os']['family'] {
