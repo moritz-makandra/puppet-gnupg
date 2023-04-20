@@ -3,7 +3,7 @@ class gnupg::params {
 
   $package_ensure = 'present'
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'Debian': {
       $package_name ='gnupg'
     }
@@ -13,18 +13,8 @@ class gnupg::params {
     'Suse': {
       $package_name = 'gpg2'
     }
-
-    'Linux': {
-      if $::operatingsystem == 'Amazon' {
-        $package_name = 'gnupg2'
-      }
-      else {
-        fail("Osfamily ${::osfamily} with operating system ${::operatingsystem} is not supported")
-      }
-    }
     default: {
-      fail("Osfamily ${::osfamily} is not supported")
+      fail("${facts['os']['family']} is not supported")
     }
   }
-
 }
