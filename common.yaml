@@ -1,0 +1,3 @@
+---
+gnupg::package_ensure: 'present'
+gnupg::package_name: 'gnupg'
