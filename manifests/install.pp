@@ -1,12 +1,13 @@
 # @summary Install the package
 # @api private
-class gnupg::install {
-
+class gnupg::install (
+  String $ensure,
+  String $package,
+) {
   if !defined(Package['gnupg']) {
     ensure_resource('package', 'gnupg', {
-      ensure => $gnupg::package_ensure,
-      name   => $gnupg::package_name,
+      ensure => $ensure,
+      name   => $package,
     })
   }
-
 }
