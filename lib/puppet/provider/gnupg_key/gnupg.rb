@@ -143,7 +143,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
   def puppet_content
     # Look up (if necessary) and return remote content.
     return @content if @content
-    unless tmp = Puppet::FileServing::Content.indirection.find(resource[:key_source], environment: resource.catalog.environment_instance, links: :follow)
+    unless (tmp = Puppet::FileServing::Content.indirection.find(resource[:key_source], environment: resource.catalog.environment_instance, links: :follow))
       raise 'Could not find any content at %s' % resource[:key_source]
     end
     @content = tmp.content
