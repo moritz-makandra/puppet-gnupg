@@ -1,4 +1,5 @@
 fixtures:
   symlinks:
     gnupg: "#{source_dir}"
-
+  forge_modules:
+    stdlib: 'puppetlabs/stdlib'

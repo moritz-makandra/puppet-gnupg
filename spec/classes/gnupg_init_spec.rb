@@ -1,37 +1,25 @@
 require 'spec_helper'
 
 describe 'gnupg', :type => :class do
+  on_supported_os.each do |os, os_facts|
+    context "on #{os}" do
+      let(:facts) { os_facts }
 
-  ['RedHat', 'Debian', 'Linux', 'Suse'].each do |system|
-    if system == 'Linux'
-      let(:facts) {{ :osfamily => 'Linux', :operatingsystem => 'Amazon' }}
-    else
-      let(:facts) {{ :osfamily => system }}
-    end
+      it { is_expected.to compile.with_all_deps }
+      it { is_expected.to contain_class('gnupg::install') }
+      it {
+        is_expected.to contain_package('gnupg')
+          .with_ensure('present')
+      }
 
-    it { expect contain_class('gnupg::install') }
-
-    describe "gnupg on system #{system}" do
-
-      context "when enabled" do
+      context 'when absent' do
         let(:params) {{
-          :package_ensure => 'present',
-          :package_name   => 'gnupg'
+          package_ensure: 'absent',
         }}
 
-        it { expect contain_package('gnupg').with({
-          'ensure' => 'present'})
-        }
-      end
-
-      context 'when disabled' do
-        let(:params) {{
-          :package_ensure => 'absent',
-          :package_name   => 'gnupg'
-        }}
-
-        it { expect contain_package('gnupg').with({
-         'ensure' => 'absent'})
+        it {
+          is_expected.to contain_package('gnupg')
+            .with_ensure('absent')
         }
       end
     end
