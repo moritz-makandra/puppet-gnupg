@@ -1,26 +1,11 @@
 require 'spec_helper_acceptance'
 
-describe 'gnupg class', unless: UNSUPPORTED_PLATFORMS.include?(fact('osfamily')) do
-  case fact('osfamily')
-  when 'RedHat'
-    package_name = 'gnupg2'
-  when 'Debian'
-    package_name = 'gnupg'
+describe 'gnupg' do
+  let(:manifest) do
+    <<~PP
+    class { 'gnupg': }
+    PP
   end
 
-  context 'default parameters' do
-    it 'works with no errors' do
-      pp = <<-EOS
-      class { 'gnupg': }
-      EOS
-
-      # Run it twice and test for idempotency
-      apply_manifest(pp, catch_failures: true)
-      expect(apply_manifest(pp, catch_failures: true).exit_code).to be_zero
-    end
-
-    describe package(package_name) do
-      it { is_expected.to be_installed }
-    end
-  end
+  it_behaves_like 'an idempotent resource'
 end

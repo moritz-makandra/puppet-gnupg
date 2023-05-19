@@ -36,7 +36,7 @@ describe Puppet::Type.type(:gnupg_key) do
     gnupg_key[:user] = 'foo-bar'
   end
 
-  ['http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key', 'ldap://keys.puppetlabs.com', 'hkp://pgp.mit.edu/'].each do |val|
+  ['http://pkg.jenkins.io/debian/jenkins.io.key', 'ldap://keys.puppetlabs.com', 'hkp://pgp.mit.edu/'].each do |val|
     it "accepts key_server #{val}" do
       gnupg_key[:key_server] = val
       expect(gnupg_key[:key_server]).to eq val.to_s
@@ -103,7 +103,7 @@ describe Puppet::Type.type(:gnupg_key) do
   end
 
   it 'allows key_content with armored public key' do
-    key = File.read('files/random.public.key')
+    key = File.read('files/test.public.key')
     resource = Puppet::Type.type(:gnupg_key).new(name: 'key', key_type: 'public', key_content: key)
     expect(resource[:key_content]).to eq key
   end
