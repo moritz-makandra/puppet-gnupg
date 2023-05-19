@@ -29,7 +29,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
       fingerprint_command = "gpg --fingerprint --with-colons #{resource[:key_id]} | awk -F: '$1 == \"fpr\" {print $10;}'"
       fingerprint = Puppet::Util::Execution.execute(fingerprint_command, uid: user_id, custom_environment: gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
-      raise Puppet::Error, "Could not determine fingerprint for  #{resource[:key_id]} for user #{resource[:user]}: #{fingerprint}"
+      raise Puppet::Error, "Could not determine fingerprint for #{resource[:key_id]} for user #{resource[:user]}: #{e}"
     end
 
     if resource[:key_type] == :public
@@ -41,9 +41,9 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     end
 
     begin
-      output = Puppet::Util::Execution.execute(command, uid: user_id, custom_environment: gpgenv(resource))
+      Puppet::Util::Execution.execute(command, uid: user_id, custom_environment: gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
-      raise Puppet::Error, "Could not remove #{resource[:key_id]} for user #{resource[:user]}: #{output}"
+      raise Puppet::Error, "Could not remove #{resource[:key_id]} for user #{resource[:user]}: #{e}"
     end
   end
 
@@ -66,9 +66,9 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
                 "gpg --keyserver #{resource[:key_server]} --keyserver-options http-proxy=#{resource[:proxy]} --recv-keys #{resource[:key_id]}"
               end
     begin
-      output = Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
+      Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
-      raise Puppet::Error, "Key #{resource[:key_id]} does not exist on #{resource[:key_server]}\n#{e}"
+      raise Puppet::Error, "Key #{resource[:key_id]} does not exist on #{resource[:key_server]}: #{e}"
     end
   end
 
@@ -84,9 +84,9 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     path = create_temporary_file(user_id, resource[:key_content])
     command = "gpg --batch --import #{path}"
     begin
-      output = Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
+      Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
     rescue Puppet::ExecutionFailure => e
-      raise Puppet::Error, "Error while importing key #{resource[:key_id]} using key content:\n#{output}}"
+      raise Puppet::Error, "Error while importing key #{resource[:key_id]} using key content: #{e}"
     end
   end
 
@@ -94,9 +94,9 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     if File.file?(resource[:key_source])
       command = "gpg --batch --import #{resource[:key_source]}"
       begin
-        output = Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
+        Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
       rescue Puppet::ExecutionFailure => e
-        raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}"
+        raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}: #{e}"
       end
     elsif
       raise Puppet::Error, "Local file #{resource[:key_source]} for #{resource[:key_id]} does not exists"
@@ -122,14 +122,14 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
         raise Puppet::ExecutionFailure
       end
     rescue Puppet::ExecutionFailure => e
-      raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}:\n#{e}"
+      raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}: #{e}"
     end
   end
 
   def user_id
     Etc.getpwnam(resource[:user]).uid
   rescue => e
-    raise Puppet::Error, "User #{resource[:user]} does not exists"
+    raise Puppet::Error, "User #{resource[:user]} does not exists: #{e}"
   end
 
   def create_temporary_file(user_id, content)
