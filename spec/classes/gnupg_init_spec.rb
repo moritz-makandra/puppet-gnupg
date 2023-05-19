@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'gnupg', :type => :class do
+describe 'gnupg', type: :class do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
       let(:facts) { os_facts }
@@ -13,9 +13,11 @@ describe 'gnupg', :type => :class do
       }
 
       context 'when absent' do
-        let(:params) {{
-          package_ensure: 'absent',
-        }}
+        let(:params) do
+          {
+            package_ensure: 'absent',
+          }
+        end
 
         it {
           is_expected.to contain_package('gnupg')

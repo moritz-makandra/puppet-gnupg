@@ -63,7 +63,7 @@ Puppet::Type.newtype(:gnupg_key) do
 
     validate do |value|
       # freebsd/linux username limitation
-      unless value =~ %r{^[a-z_][a-z0-9_-]*[$]?}
+      unless %r{^[a-z_][a-z0-9_-]*[$]?}.match?(value)
         raise ArgumentError, "Invalid username format for #{value}"
       end
     end
@@ -86,11 +86,11 @@ Puppet::Type.newtype(:gnupg_key) do
       break if Puppet::Util.absolute_path?(source)
 
       begin
-        if URI.const_defined? 'DEFAULT_PARSER'
-          uri = URI.parse(URI::DEFAULT_PARSER.escape(source))
-        else
-          uri = URI.parse(URI.escape(source))
-        end
+        uri = if URI.const_defined? 'DEFAULT_PARSER'
+                URI.parse(URI::DEFAULT_PARSER.escape(source))
+              else
+                URI.parse(URI.escape(source))
+              end
       rescue => detail
         raise ArgumentError, "Could not understand source #{source}: #{detail}"
       end
@@ -101,13 +101,13 @@ Puppet::Type.newtype(:gnupg_key) do
     end
 
     munge do |source|
-      if URI.const_defined? 'DEFAULT_PARSER'
-        uri = URI.parse(URI::DEFAULT_PARSER.escape(source))
-      else
-        uri = URI.parse(URI.escape(source))
-      end
+      uri = if URI.const_defined? 'DEFAULT_PARSER'
+              URI.parse(URI::DEFAULT_PARSER.escape(source))
+            else
+              URI.parse(URI.escape(source))
+            end
 
-      if %w{file}.include?(uri.scheme)
+      if ['file'].include?(uri.scheme)
         uri.path
       else
         source
@@ -120,11 +120,11 @@ Puppet::Type.newtype(:gnupg_key) do
 
     validate do |server|
       if server
-        if URI.const_defined? 'DEFAULT_PARSER'
-          uri = URI.parse(URI::DEFAULT_PARSER.escape(server))
-        else
-          uri = URI.parse(URI.escape(server))
-        end
+        uri = if URI.const_defined? 'DEFAULT_PARSER'
+                URI.parse(URI::DEFAULT_PARSER.escape(server))
+              else
+                URI.parse(URI.escape(server))
+              end
         unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS) ||
                uri.is_a?(URI::LDAP) || ['hkp'].include?(uri.scheme)
           raise ArgumentError, "Invalid keyserver value #{server}"
@@ -143,7 +143,7 @@ Puppet::Type.newtype(:gnupg_key) do
       long more accurate (but  less  convenient) 16-character key ID."
 
     validate do |value|
-      unless ([8, 16, 40].include? value.length) and value =~ /^[0-9A-Fa-f]+$/
+      unless ([8, 16, 40].include? value.length) && value =~ (%r{^[0-9A-Fa-f]+$})
         raise ArgumentError, "Invalid key id #{value}"
       end
     end
@@ -166,12 +166,12 @@ Puppet::Type.newtype(:gnupg_key) do
 
     validate do |value|
       if value
-        if URI.const_defined? 'DEFAULT_PARSER'
-          uri = URI.parse(URI::DEFAULT_PARSER.escape(value))
-        else
-          uri = URI.parse(URI.escape(value))
-        end
-        unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS) 
+        uri = if URI.const_defined? 'DEFAULT_PARSER'
+                URI.parse(URI::DEFAULT_PARSER.escape(value))
+              else
+                URI.parse(URI.escape(value))
+              end
+        unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
           raise ArgumentError, "Invalid proxy value #{value}"
         end
       end

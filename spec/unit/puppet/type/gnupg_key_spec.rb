@@ -38,14 +38,14 @@ describe Puppet::Type.type(:gnupg_key) do
   end
 
   ['http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key', 'ldap://keys.puppetlabs.com', 'hkp://pgp.mit.edu/'].each do |val|
-    it "should accept key_server #{val}" do
+    it "accepts key_server #{val}" do
       @gnupg_key[:key_server] = val
       expect(@gnupg_key[:key_server]).to eq val.to_s
     end
   end
 
   ['puppet:///modules/gnupg/random.key', 'http://www.puppetlabs.com/key.key', 'https://www.puppetlabs.com/key.key', 'file:///etc/foo.key', '/etc/foo.key'].each do |val|
-    it "should accept key_source #{val}" do
+    it "accepts key_source #{val}" do
       @gnupg_key[:key_source] = val
       expect(@gnupg_key[:key_source]).to eq val.to_s.gsub('file://', '')
     end
@@ -64,14 +64,14 @@ describe Puppet::Type.type(:gnupg_key) do
   end
 
   ['20BC0A86', 'D50582e6', '20BC0a86', '9B7D32F2D50582E6', '3CCe8BC520bc0A86'].each do |val|
-    it "should allow key_id with #{val}" do
+    it "allows key_id with #{val}" do
       @gnupg_key[:key_id] = val
       expect(@gnupg_key[:key_id]).to eq val.upcase.to_sym
     end
   end
 
   ['ABCD', '1234567G', 'ASA1321', 'q321asd'].each do |val|
-    it "should not allow key_id with #{val}" do
+    it "does not allow key_id with #{val}" do
       expect {
         @gnupg_key[:key_id] = val
       }.to raise_error(%r{Invalid key id*})
@@ -79,7 +79,7 @@ describe Puppet::Type.type(:gnupg_key) do
   end
 
   [:public, :private, :both].each do |val|
-    it "should allow key_type with #{val}" do
+    it "allows key_type with #{val}" do
       @gnupg_key[:key_type] = val
       expect(@gnupg_key[:key_type]).to eq val
     end
@@ -90,7 +90,7 @@ describe Puppet::Type.type(:gnupg_key) do
   end
 
   [:special, :other].each do |val|
-    it "should not allow invalid key_type of #{val}" do
+    it "does not allow invalid key_type of #{val}" do
       expect {
         @gnupg_key[:key_type] = val
       }.to raise_error(Puppet::Error)

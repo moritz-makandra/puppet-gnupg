@@ -8,7 +8,7 @@ unless ENV['RS_PROVISION'] == 'no'
   default.is_pe? ? install_pe : install_puppet(foss_opts)
 
   hosts.each do |host|
-    if host['platform'] =~ %r{debian}
+    if %r{debian}.match?(host['platform'])
       on host, 'echo \'export PATH=/var/lib/gems/1.8/bin/:${PATH}\' >> ~/.bashrc'
     end
 

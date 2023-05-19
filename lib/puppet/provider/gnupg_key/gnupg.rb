@@ -98,27 +98,26 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
       rescue Puppet::ExecutionFailure => e
         raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}: #{e}"
       end
-    elsif
-      raise Puppet::Error, "Local file #{resource[:key_source]} for #{resource[:key_id]} does not exists"
+    elsif raise Puppet::Error, "Local file #{resource[:key_source]} for #{resource[:key_id]} does not exists"
     end
   end
 
   def add_key_at_url
-    if URI.const_defined? 'DEFAULT_PARSER'
-      uri = URI.parse(URI::DEFAULT_PARSER.escape(resource[:key_source]))
-    else
-      uri = URI.parse(URI.escape(resource[:key_source]))
-    end
+    uri = if URI.const_defined? 'DEFAULT_PARSER'
+            URI.parse(URI::DEFAULT_PARSER.escape(resource[:key_source]))
+          else
+            URI.parse(URI.escape(resource[:key_source]))
+          end
     case uri.scheme
-    when /https/
+    when %r{https}
       command = "wget -O- #{resource[:key_source]} | gpg --batch --import"
     when 'puppet'
       path = create_temporary_file user_id, puppet_content
       command = "gpg --batch --import #{path}"
     end
     begin
-      output = Puppet::Util::Execution.execute(command, :uid => user_id, :failonfail => true, :custom_environment => gpgenv(resource))
-      if output =~ %r{unable to fetch}
+      output = Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
+      if %r{unable to fetch}.match?(output)
         raise Puppet::ExecutionFailure
       end
     rescue Puppet::ExecutionFailure => e
@@ -144,8 +143,8 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
   def puppet_content
     # Look up (if necessary) and return remote content.
     return @content if @content
-    unless tmp = Puppet::FileServing::Content.indirection.find(resource[:key_source], :environment => resource.catalog.environment_instance, :links => :follow)
-      fail "Could not find any content at %s" % resource[:key_source]
+    unless tmp = Puppet::FileServing::Content.indirection.find(resource[:key_source], environment: resource.catalog.environment_instance, links: :follow)
+      raise 'Could not find any content at %s' % resource[:key_source]
     end
     @content = tmp.content
   end
@@ -162,9 +161,9 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
 
     output = Puppet::Util::Execution.execute(command, uid: user_id, custom_environment: gpgenv(resource))
     if output.exitstatus == 0
-      return true
+      true
     elsif output.exitstatus == 2
-      return false
+      false
     else
       raise Puppet::Error, "Non recognized exit status from GnuPG #{output.exitstatus} #{output}"
     end
