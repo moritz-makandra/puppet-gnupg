@@ -53,9 +53,9 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     if resource[:key_server]
       add_key_from_key_server
     elsif resource[:key_source]
-      add_key_from_key_source
+      add_key_from(:key_source)
     elsif resource[:key_content]
-      add_key_from_key_content
+      add_key_from(:key_content)
     end
   end
 
@@ -72,11 +72,17 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     end
   end
 
-  def add_key_from_key_source
-    if Puppet::Util.absolute_path?(resource[:key_source])
-      add_key_at_path
-    else
-      add_key_at_url
+  def add_key_from(rkey)
+    tmp_path = if %r{content$}.match?(rkey.to_s)
+                 create_temporary_file(user_id, resource[rkey])
+               else
+                 create_temporary_file(user_id, puppet_content)
+               end
+    command = "gpg --batch --import #{tmp_path}"
+    begin
+      Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
+    rescue Puppet::ExecutionFailure => e
+      raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}: #{e}"
     end
   end
 
@@ -90,41 +96,6 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     end
   end
 
-  def add_key_at_path
-    if File.file?(resource[:key_source])
-      command = "gpg --batch --import #{resource[:key_source]}"
-      begin
-        Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
-      rescue Puppet::ExecutionFailure => e
-        raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}: #{e}"
-      end
-    elsif raise Puppet::Error, "Local file #{resource[:key_source]} for #{resource[:key_id]} does not exists"
-    end
-  end
-
-  def add_key_at_url
-    uri = if URI.const_defined? 'DEFAULT_PARSER'
-            URI.parse(URI::DEFAULT_PARSER.escape(resource[:key_source]))
-          else
-            URI.parse(URI.escape(resource[:key_source]))
-          end
-    case uri.scheme
-    when %r{https}
-      command = "wget -O- #{resource[:key_source]} | gpg --batch --import"
-    when 'puppet'
-      path = create_temporary_file user_id, puppet_content
-      command = "gpg --batch --import #{path}"
-    end
-    begin
-      output = Puppet::Util::Execution.execute(command, uid: user_id, failonfail: true, custom_environment: gpgenv(resource))
-      if %r{unable to fetch}.match?(output)
-        raise Puppet::ExecutionFailure
-      end
-    rescue Puppet::ExecutionFailure => e
-      raise Puppet::Error, "Error while importing key #{resource[:key_id]} from #{resource[:key_source]}: #{e}"
-    end
-  end
-
   def user_id
     Etc.getpwnam(resource[:user]).uid
   rescue => e
@@ -133,7 +104,7 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
 
   def create_temporary_file(user_id, content)
     Puppet::Util::SUIDManager.asuser(user_id) do
-      tmpfile = Tempfile.open(['golja-gnupg', 'key'])
+      tmpfile = Tempfile.open(['h0tw1r3-gnupg', 'key'])
       tmpfile.write(content)
       tmpfile.flush
       break tmpfile.path.to_s
