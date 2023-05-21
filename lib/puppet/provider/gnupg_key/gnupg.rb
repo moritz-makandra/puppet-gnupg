@@ -136,12 +136,14 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
     elsif output.exitstatus == 2
       false
     else
-      raise Puppet::Error, "Non recognized exit status from GnuPG #{output.exitstatus} #{output}"
+      raise Puppet::Error, "Unrecognized exit status from GnuPG #{output.exitstatus} #{output}"
     end
   end
 
   def create
     add_key
+    # TODO: check before adding
+    raise Puppet::Error, "#{resource[:key_type]} key added did not contain #{resource[:key_id]}!" unless exists?
   end
 
   def destroy
