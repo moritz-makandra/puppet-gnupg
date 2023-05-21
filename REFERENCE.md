@@ -76,7 +76,7 @@ Default value: `present`
 
 The following parameters are available in the `gnupg_key` type.
 
-* [`gnupg_home`](#gnupg_home)
+* [`home`](#home)
 * [`key_content`](#key_content)
 * [`key_id`](#key_id)
 * [`key_server`](#key_server)
@@ -87,21 +87,19 @@ The following parameters are available in the `gnupg_key` type.
 * [`proxy`](#proxy)
 * [`user`](#user)
 
-##### <a name="gnupg_home"></a>`gnupg_home`
+##### <a name="home"></a>`home`
 
-The gnupg home directory. Overrides the default user's homedir.
+Gnupg home directory. Overrides gpg default, typically .gnupg under the user's home directory
 
 Default value: ``false``
 
 ##### <a name="key_content"></a>`key_content`
 
-Key content. The result of exporting the key using ASCII armor.
-Can be either a public or private key.
+Content of an ASCII armor PGP key
 
 ##### <a name="key_id"></a>`key_id`
 
-Key ID. Usually the traditional 8-character key ID. Also accepted the
-long more accurate (but  less  convenient) 16-character key ID.
+8, 16, or 40 character version of the key ID
 
 ##### <a name="key_server"></a>`key_server`
 
@@ -109,20 +107,13 @@ PGP key server from where to retrieve the public key
 
 ##### <a name="key_source"></a>`key_source`
 
-A source file containing PGP key. Values can be URIs pointing to remote files,
-or fully qualified paths to files available on the local system.
-
-The available URI schemes are *puppet*, *https*, *http* and *file*. *Puppet*
-URIs will retrieve files from Puppet's built-in file server, and are
-usually formatted as:
-
-`puppet:///modules/name_of_module/filename`
+Location of a file containing the PGP key. Values may be a local file path or Puppet supported URL.
 
 ##### <a name="key_type"></a>`key_type`
 
 Valid values: `public`, `private`, `both`
 
-The type of the key(s) being managed.
+type of key(s) being managed
 
 Default value: `public`
 
@@ -130,8 +121,7 @@ Default value: `public`
 
 namevar
 
-This attribute is currently used as a
-system-wide primary key - namevar and therefore has to be unique.
+arbitrary catalog unique resource name
 
 ##### <a name="provider"></a>`provider`
 
@@ -140,10 +130,9 @@ discover the appropriate provider for your platform.
 
 ##### <a name="proxy"></a>`proxy`
 
-Set the proxy to use for HTTP and HKP keyservers.
+set the proxy to use for HTTP and HKP keyservers
 
 ##### <a name="user"></a>`user`
 
-The user account in which the PGP public key should be installed.
-Usually it's stored in HOME/.gnupg/ dir
+execute gpg command with this user
 

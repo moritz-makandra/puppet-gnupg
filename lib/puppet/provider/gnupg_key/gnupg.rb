@@ -17,8 +17,8 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
   commands awk: 'awk'
 
   def gpgenv(resource)
-    if resource[:gnupg_home]
-      { 'GNUPGHOME' => resource[:gnupg_home] }
+    if resource[:home]
+      { 'GNUPGHOME' => resource[:home] }
     else
       {}
     end

@@ -26,17 +26,15 @@ Puppet::Type.newtype(:gnupg_key) do
     end
 
     if creator_count > 1
-      raise ArgumentError, "You cannot specify more than one of #{KEY_SOURCES.map { |p| p.to_s }.join(', ')}, " \
-                           'much to learn, you still have.'
+      raise Puppet::ParseError, "You cannot specify more than one of #{KEY_SOURCES.map { |p| p.to_s }.join(', ')}"
     end
 
     if creator_count == 0 && self[:ensure] == :present
-      raise ArgumentError, "You need to specify at least one of #{KEY_SOURCES.map { |p| p.to_s }.join(', ')}, " \
-                           'much to learn, you still have.'
+      raise Puppet::ParseError, "You need to specify at least one of #{KEY_SOURCES.map { |p| p.to_s }.join(', ')}"
     end
 
     if self[:ensure] == :present && self[:key_type] == :both
-      raise ArgumentError, "A key type of 'both' is invalid when ensure is 'present'."
+      raise Puppet::ParseError, "A key type of 'both' is invalid when ensure is 'present'."
     end
 
     [:public, :private].each do |type|
@@ -47,19 +45,17 @@ Puppet::Type.newtype(:gnupg_key) do
       last_line = key_lines.last.strip
 
       unless first_line == KEY_CONTENT_REGEXES[type][0] && last_line == KEY_CONTENT_REGEXES[type][1]
-        raise ArgumentError, "Provided key content does not look like a #{type} key."
+        raise Puppet::ParseError, "Provided key content does not look like a #{type} key."
       end
     end
   end
 
   newparam(:name, namevar: true) do
-    desc "This attribute is currently used as a
-      system-wide primary key - namevar and therefore has to be unique."
+    desc 'arbitrary catalog unique resource name'
   end
 
   newparam(:user) do
-    desc "The user account in which the PGP public key should be installed.
-    Usually it's stored in HOME/.gnupg/ dir"
+    desc 'execute gpg command with this user'
 
     validate do |value|
       # freebsd/linux username limitation
@@ -70,16 +66,7 @@ Puppet::Type.newtype(:gnupg_key) do
   end
 
   newparam(:key_source) do
-    desc <<-'EOT'
-      A source file containing PGP key. Values can be URIs pointing to remote files,
-      or fully qualified paths to files available on the local system.
-
-      The available URI schemes are *puppet*, *https*, *http* and *file*. *Puppet*
-      URIs will retrieve files from Puppet's built-in file server, and are
-      usually formatted as:
-
-      `puppet:///modules/name_of_module/filename`
-    EOT
+    desc 'Location of a file containing the PGP key. Values may be a local file path or Puppet supported URL.'
 
     validate do |source|
       raise ArgumentError, 'Arrays not accepted as an source parameter' if source.is_a?(Array)
@@ -95,9 +82,9 @@ Puppet::Type.newtype(:gnupg_key) do
         raise ArgumentError, "Could not understand source #{source}: #{detail}"
       end
 
-      raise ArgumentError, "Cannot use relative URLs '#{source}'" unless uri.absolute?
-      raise ArgumentError, "Cannot use opaque URLs '#{source}'" unless uri.hierarchical?
-      raise ArgumentError, "Cannot use URLs of type '#{uri.scheme}' as source for fileserving" unless ['file', 'puppet', 'https', 'http'].include?(uri.scheme)
+      raise Puppet::ParseError, "Cannot use relative URLs '#{source}'" unless uri.absolute?
+      raise Puppet::ParseError, "Cannot use opaque URLs '#{source}'" unless uri.hierarchical?
+      raise Puppet::ParseError, "Cannot use URLs of type '#{uri.scheme}' as source for fileserving" unless ['file', 'puppet', 'https', 'http'].include?(uri.scheme)
     end
 
     munge do |source|
@@ -127,24 +114,22 @@ Puppet::Type.newtype(:gnupg_key) do
               end
         unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS) ||
                uri.is_a?(URI::LDAP) || ['hkp'].include?(uri.scheme)
-          raise ArgumentError, "Invalid keyserver value #{server}"
+          raise Puppet::ParseError, "Invalid keyserver value #{server}"
         end
       end
     end
   end
 
   newparam(:key_content) do
-    desc "Key content. The result of exporting the key using ASCII armor.
-      Can be either a public or private key."
+    desc 'Content of an ASCII armor PGP key'
   end
 
   newparam(:key_id) do
-    desc "Key ID. Usually the traditional 8-character key ID. Also accepted the
-      long more accurate (but  less  convenient) 16-character key ID."
+    desc '8, 16, or 40 character version of the key ID'
 
     validate do |value|
       unless ([8, 16, 40].include? value.length) && value =~ (%r{^[0-9A-Fa-f]+$})
-        raise ArgumentError, "Invalid key id #{value}"
+        raise Puppet::ParseError, "Invalid key id #{value}"
       end
     end
 
@@ -154,7 +139,7 @@ Puppet::Type.newtype(:gnupg_key) do
   end
 
   newparam(:key_type) do
-    desc 'The type of the key(s) being managed.'
+    desc 'type of key(s) being managed'
 
     newvalues(:public, :private, :both)
 
@@ -162,7 +147,7 @@ Puppet::Type.newtype(:gnupg_key) do
   end
 
   newparam(:proxy) do
-    desc 'Set the proxy to use for HTTP and HKP keyservers.'
+    desc 'set the proxy to use for HTTP and HKP keyservers'
 
     validate do |value|
       if value
@@ -178,13 +163,13 @@ Puppet::Type.newtype(:gnupg_key) do
     end
   end
 
-  newparam(:gnupg_home) do
-    desc "The gnupg home directory. Overrides the default user's homedir."
+  newparam(:home) do
+    desc "Gnupg home directory. Overrides gpg default, typically .gnupg under the user's home directory"
     defaultto false
 
     validate do |value|
       unless Puppet::Util.absolute_path?(value)
-        raise Puppet::Error, _("File paths must be fully qualified, not '%{path}'") % { path: value }
+        raise Puppet::ParseError, _("File paths must be fully qualified, not '%{path}'") % { path: value }
       end
     end
 
