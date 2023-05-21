@@ -2,4 +2,6 @@ fixtures:
   symlinks:
     gnupg: "#{source_dir}"
   forge_modules:
-    stdlib: 'puppetlabs/stdlib'
+    stdlib:
+      repo: 'puppetlabs/stdlib'
+      ref: '6.6.0'

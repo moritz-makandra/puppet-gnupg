@@ -6,8 +6,6 @@
 def configure_beaker(modules: :metadata, &block)
   ENV['PUPPET_INSTALL_TYPE'] ||= 'agent'
   ENV['BEAKER_PUPPET_COLLECTION'] ||= 'puppet6'
-  ENV['BEAKER_debug'] ||= 'true'
-  ENV['BEAKER_HYPERVISOR'] ||= 'docker'
 
   # On Ruby 3 this doesn't appear to matter but on Ruby 2 beaker-hiera must be
   # included before beaker-rspec so Beaker::DSL is final
@@ -73,6 +71,10 @@ end
 if Bundler.rubygems.find_name('voxpupuli-acceptance').any?
   require 'voxpupuli/acceptance/examples'
 
+  require 'rake'
+  Rake.load_rakefile(File.join(File.dirname(File.dirname(File.dirname(File.dirname(__FILE__)))), 'Rakefile'))
+  Rake::Task['spec_prep'].invoke
+
   RSpec.configure do |c|
     if ENV['GITHUB_ACTIONS'] == 'true'
       c.formatter = 'RSpec::Github::Formatter'
@@ -93,7 +95,11 @@ if Bundler.rubygems.find_name('voxpupuli-acceptance').any?
 
     # Node setup
     c.add_setting :setup_acceptance_node, default: File.join('spec', 'setup_acceptance_node.pp')
+
+    c.after :suite do
+      Rake::Task['spec_clean'].invoke
+    end
   end
 
-  configure_beaker
+  configure_beaker(modules: :fixtures)
 end
