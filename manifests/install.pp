@@ -6,8 +6,8 @@ class gnupg::install (
 ) {
   if !defined(Package['gnupg']) {
     ensure_resource('package', 'gnupg', {
-      ensure => $ensure,
-      name   => $package,
+        ensure => $ensure,
+        name   => $package,
     })
   }
 }

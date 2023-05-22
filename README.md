@@ -86,6 +86,12 @@ Contributions are welcome and encouraged! Please submit a pull request to the
 tests and documentation. If you're unfamiliar, that's okay, someone will help
 guide you through the process.
 
+## Acknowledgements
+
+Forked from version 1.2.3 of the [gnupg] module developed by [Dejan Golja]
+
 [Puppet Forge]: https://forge.puppet.com/modules/h0tw1r3/gnupg
 [project on Github]: https://github.com/h0tw1r3/puppet-gnupg
 [metadata.json]: metadata.json
+[gnupg]: https://forge.puppet.com/modules/golja/gnupg
+[Dejan Golja]: https://github.com/dgolja
