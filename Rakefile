@@ -88,4 +88,3 @@ EOM
   end
 end
 
-ENV['BEAKER_PUPPET_COLLECTION'] ||= "puppet#{Gem.loaded_specs['puppet'].version.segments[0]}"

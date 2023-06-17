@@ -3,6 +3,18 @@
 require 'spec_helper_acceptance'
 
 describe 'manage gnupg keys' do
+  before(:all) do
+    filedir = File.join(File.dirname(File.dirname(File.dirname(__FILE__))), 'files')
+    testkeys = [
+      'random.private.key',
+      'test.public.key',
+      'test2.public.key',
+    ]
+    testkeys.each do |keyfile|
+      bolt_upload_file(File.join(filedir, keyfile), "/tmp/#{keyfile}")
+    end
+  end
+
   pp = <<~EOS
     include gnupg
     EOS
@@ -35,7 +47,9 @@ describe 'manage gnupg keys' do
       EOS
     end
 
-    it_behaves_like 'an idempotent resource'
+    it 'behaves idempotently' do
+      idempotent_apply(manifest)
+    end
 
     describe command('gpg --list-keys 4FDE866E31AF4DA20D8908824C589D9E8E04A1D3') do
       its(:stdout) { is_expected.to contain('4FDE866E31AF4DA20D8908824C589D9E8E04A1D3') }
@@ -67,8 +81,8 @@ describe 'manage gnupg keys' do
       EOS
     end
 
-    it 'applies with no errors' do
-      apply_manifest(manifest, expect_changes: true)
+    it 'behaves idempotently' do
+      idempotent_apply(manifest)
     end
 
     describe command('gpg --list-keys 60135C26926FA9B9') do
@@ -249,7 +263,7 @@ describe 'manage gnupg keys' do
 
   context 'add key to specific GNUPGHOME' do
     before(:all) do
-      gpg('--batch --yes --delete-key 926FA9B9', acceptable_exit_codes: [0, 2])
+      gpg('--batch --yes --delete-key 926FA9B9', expect_failures: true)
     end
 
     let(:manifest) do

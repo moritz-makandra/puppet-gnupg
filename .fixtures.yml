@@ -2,6 +2,8 @@ fixtures:
   symlinks:
     gnupg: "#{source_dir}"
   forge_modules:
-    stdlib:
-      repo: 'puppetlabs/stdlib'
-      ref: '6.6.0'
+    stdlib: 'puppetlabs/stdlib'
+  repositories:
+    provision: 'https://github.com/puppetlabs/provision.git'
+    puppet_agent: 'https://github.com/puppetlabs/puppetlabs-puppet_agent.git'
+    facts: 'https://github.com/puppetlabs/puppetlabs-facts.git'

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module LocalHelpers
-  def gpg(gpg_cmd, options = { user: 'root', acceptable_exit_codes: [0] }, &block)
+  def gpg(gpg_cmd, options = { user: 'root', expect_failures: false }, &block)
     user = options.delete(:user)
     gpg = "gpg #{gpg_cmd}"
-    shell("su #{user} -c \"#{gpg}\"", options, &block)
+    run_shell("su #{user} -c \"#{gpg}\"", options, &block)
   end
 end
 

@@ -1,11 +1,9 @@
 require 'spec_helper_acceptance'
 
 describe 'gnupg' do
-  let(:manifest) do
-    <<~PP
-    class { 'gnupg': }
-    PP
-  end
+  let(:pp) { "class { 'gnupg': }" }
 
-  it_behaves_like 'an idempotent resource'
+  it 'behaves idempotently' do
+    idempotent_apply(pp)
+  end
 end
