@@ -1,12 +1,21 @@
 ---
+.gitlab-ci.yml:
+  delete: true
+appveyor.yml:
+  delete: true
+.travis.yml:
+  delete: true
+
 Rakefile:
   default_disabled_lint_checks:
     - '140chars'
   extras: |-
     ENV['BEAKER_PUPPET_COLLECTION'] ||= "puppet#{Gem.loaded_specs['puppet'].version.segments[0]}"
+
 Gemfile:
   optional:
     ':system_tests':
       - gem: voxpupuli-acceptance
+
 spec/spec_helper.rb:
   coverage_report: true
