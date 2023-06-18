@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0](https://github.com/h0tw1r3/puppet-gnupg/tree/2.0.0) (2023-06-17)
+
+**Chores**
+
+* Acceptance test framework changed from beaker to litmus
+* Drop EOL operating systems from metadata
+* Update to latest PDK template
+
 ## [1.5.1](https://github.com/h0tw1r3/puppet-gnupg/tree/1.5.1) (2023-05-22)
 
 [Full Changelog](https://github.com/h0tw1r3/puppet-gnupg/compare/fork...1.5.1)

@@ -1,10 +1,10 @@
 {
   "name": "h0tw1r3-gnupg",
-  "version": "1.5.2",
+  "version": "2.0.0",
   "author": "Jeffrey Clark",
   "summary": "Manage gnupg package and public keys",
   "license": "Apache-2.0",
-  "source": "git://github.com/h0tw1r3/puppet-gnupg.git",
+  "source": "https://github.com/h0tw1r3/puppet-gnupg.git",
   "project_page": "https://github.com/h0tw1r3/puppet-gnupg",
   "issues_url": "https://github.com/h0tw1r3/puppet-gnupg/issues",
   "dependencies": [
@@ -17,7 +17,6 @@
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
-        "7",
         "8",
         "9"
       ]
@@ -25,7 +24,6 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "9",
         "10",
         "11"
       ]
@@ -33,7 +31,6 @@
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "18.04",
         "20.04",
         "22.04"
       ]
