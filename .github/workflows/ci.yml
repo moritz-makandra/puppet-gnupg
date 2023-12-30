@@ -11,7 +11,7 @@ on:
       - 'CODEOWNERS'
       - 'AUTHORS'
   workflow_dispatch:
-    
+
 jobs:
   Spec:
     uses: "./.github/workflows/module_unit.yml"
