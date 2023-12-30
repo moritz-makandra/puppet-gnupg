@@ -15,6 +15,9 @@ appveyor.yml:
         - "rakelib/*.rake"
       Exclude:
         - ".modules/**/*"
+    Style/SingleLineMethods:
+      Exclude:
+        - "rakelib/test.rake"
 
 Rakefile:
   default_disabled_lint_checks:
