@@ -1,6 +1,6 @@
 litmus_cleanup = false
 
-desc "run acceptance tests"
+desc 'run acceptance tests'
 task :acceptance do
   litmus_cleanup = true
   Rake::Task['spec_prep'].invoke

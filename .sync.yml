@@ -6,9 +6,21 @@ appveyor.yml:
 .travis.yml:
   delete: true
 
+.rubocop.yml:
+  default_configs:
+    inherit_from: ".rubocop_todo.yml"
+    AllCops:
+      NewCops: enable
+      Include:
+        - "rakelib/*.rake"
+      Exclude:
+        - ".modules/**/*"
+
 Rakefile:
   default_disabled_lint_checks:
     - '140chars'
 
 spec/spec_helper.rb:
   coverage_report: true
+spec/default_facts.yml:
+  delete: true
