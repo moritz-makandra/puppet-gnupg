@@ -1,6 +1,6 @@
 {
   "name": "h0tw1r3-gnupg",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Jeffrey Clark",
   "summary": "Manage gnupg package and public keys",
   "license": "Apache-2.0",
@@ -15,7 +15,14 @@
   ],
   "operatingsystem_support": [
     {
-      "operatingsystem": "RedHat",
+      "operatingsystem": "AlmaLinux",
+      "operatingsystemrelease": [
+        "8",
+        "9"
+      ]
+    },
+    {
+      "operatingsystem": "Rocky",
       "operatingsystemrelease": [
         "8",
         "9"
