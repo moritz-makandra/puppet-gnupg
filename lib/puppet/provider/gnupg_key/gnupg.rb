@@ -114,10 +114,11 @@ Puppet::Type.type(:gnupg_key).provide(:gnupg) do
   def puppet_content
     # Look up (if necessary) and return remote content.
     return @content if @content
-    unless (tmp = Puppet::FileServing::Content.indirection.find(resource[:key_source], environment: resource.catalog.environment_instance, links: :follow))
+    resp = Puppet.runtime[:http].get(URI(resource[:key_source]), options: { include_system_store: true })
+    unless resp.success?
       raise 'Could not find any content at %s' % resource[:key_source]
     end
-    @content = tmp.content
+    @content = resp.body
   end
 
   def exists?
