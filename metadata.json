@@ -1,6 +1,6 @@
 {
   "name": "h0tw1r3-gnupg",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": "Jeffrey Clark",
   "summary": "Manage gnupg package and public keys",
   "license": "Apache-2.0",

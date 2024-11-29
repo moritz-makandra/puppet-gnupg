@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.2](https://github.com/h0tw1r3/puppet-gnupg/tree/2.0.1) (2024-11-29)
+
+**Bugfixes**
+
+* Could not find terminus http
+
+**Chores**
+
+* Update tested OS versions
+
 ## [2.0.0](https://github.com/h0tw1r3/puppet-gnupg/tree/2.0.0) (2023-06-17)
 
 **Chores**
